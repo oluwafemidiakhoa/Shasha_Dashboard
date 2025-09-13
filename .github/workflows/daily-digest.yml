@@ -1,0 +1,22 @@
+name: daily-digest
+on:
+  schedule:
+    - cron: '0 11 * * *'   # ~07:00 America/New_York
+  workflow_dispatch: {}
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --ignore-scripts
+      - run: node scripts/sendDailyDigestSMTP.js
+        env:
+          VITE_FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          DAILY_DIGEST_TO: ${{ secrets.DAILY_DIGEST_TO }}
+          TIMEZONE: 'America/New_York'
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
